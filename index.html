@@ -8,7 +8,7 @@
 <!-- Previsualització de l'enllaç a WhatsApp: cal una URL absoluta de la foto -->
 <meta property="og:title" content="Anna &amp; Xavi ens casem! 💍">
 <meta property="og:description" content="19 de juny de 2027 · Cal Quico (Prats de Lluçanès) · Confirmeu la vostra assistència">
-<meta property="og:image" content="https://xpicas.github.io/casament/fons.jpg">
+<meta property="og:image" content="https://xpicas.github.io/casament/fons.png">
 <meta property="og:type" content="website">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -39,12 +39,12 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  /* Foto de fons: substitueix fons.jpg per la vostra foto */
+  /* Foto de fons: ha de coincidir exactament amb el nom del fitxer del repositori */
   .fons {
     position: fixed; inset: 0; z-index: -1;
     background:
       linear-gradient(rgba(30, 28, 22, .30), rgba(30, 28, 22, .55)),
-      url('fons.jpg') center / cover no-repeat,
+      url('fons.png') center / cover no-repeat,
       linear-gradient(160deg, #8a9672, #3d4434);
   }
 
@@ -380,11 +380,14 @@
     try {
       // Sense capçaleres: el navegador l'envia com a text/plain i evita problemes de CORS amb Apps Script
       const res = await fetch(CONFIG.URL_SCRIPT, { method: 'POST', body: JSON.stringify(dades) });
-      const r = await res.json();
-      if (!r.ok) throw new Error(r.error || 'Error desconegut');
+      const text = await res.text();
+      let r;
+      try { r = JSON.parse(text); }
+      catch (_) { throw new Error('Resposta inesperada del servidor (revisa que la implementació tingui accés "Qualsevol usuari"): ' + text.slice(0, 200)); }
+      if (!r.ok) throw new Error('El servidor ha retornat un error: ' + (r.error || 'desconegut'));
       mostrarGracies();
     } catch (err) {
-      console.error(err);
+      console.error('No s\'ha pogut enviar la resposta:', err);
       $('#error-general').textContent = "Vaja, no s'ha pogut enviar. Torneu-ho a provar d'aquí a una estona o escriviu-nos directament.";
       boto.disabled = false;
       boto.textContent = 'Enviar resposta';
